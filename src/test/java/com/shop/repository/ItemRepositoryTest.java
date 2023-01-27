@@ -9,6 +9,7 @@ import org.springframework.boot.test.context.SpringBootTest;
 import org.springframework.test.context.TestPropertySource;
 
 import java.time.LocalDateTime;
+import java.util.List;
 
 /*
 @SpringBootTest:
@@ -36,19 +37,89 @@ class ItemRepositoryTest {
     @Test // 해당 메소드를 테스트 대상으로 지정
     @DisplayName("상품 저장 테스트") // Junit5에 추가된 어노테이션, 테스트 코드 실행 시 지정한 테스트명 노출
     public void createItemTest() {
-        Item item = new Item();
 
-        item.setItemNm("테스트 상품");
-        item.setPrice(10000);
-        item.setItemDetail("테스트 상품 상세 설명");
-        item.setItemSellStatus(ItemSellStatus.SELL);
-        item.setStockNumber(100);
-        item.setRegTime(LocalDateTime.now());
-        item.setUpdateTime(LocalDateTime.now());
+        /*
+        테스트 코드 실행 시 DB에 상품 데이터가 없으므로
+        테스트 데이터 생성을 위해 10개의 상품을 저장하는 메소드를 작성하여
+        findByItemNmTest()에서 실행한다.
+         */
+        for (int i = 1; i <= 10; i++) {
+            Item item = new Item();
 
-        Item saveItem = itemRepository.save(item);
-        System.out.println(saveItem.toString());
+            item.setItemNm("테스트 상품 " + i);
+            item.setPrice(10000 + i);
+            item.setItemDetail("테스트 상품 상세 설명 " + i);
+            item.setItemSellStatus(ItemSellStatus.SELL);
+            item.setStockNumber(100);
+            item.setRegTime(LocalDateTime.now());
+            item.setUpdateTime(LocalDateTime.now());
 
+            Item saveItem = itemRepository.save(item);
+        } // for
     } // createItemTest
 
+    @Test
+    @DisplayName("상품명 조회 테스트")
+    public void findByItemNmTest() {
+        this.createItemTest();
+
+        /*
+        상품명으로 상품을 검색하는 예제:
+            ItemRepository 인터페이스에서 작성했던 findByItemNm 메소드 호출
+            파라미터로 "테스트 상품 1"이라는 상품명 전달
+         */
+
+        List<Item> itemList = itemRepository.findByItemNm("테스트 상품 1");
+
+        for (Item item : itemList) {
+            System.out.println(item.toString()); // 조회 결과로 얻은 item 객체들을 출력
+        } // enhanced for
+    } // findByItemNmTest
+
+    @Test
+    @DisplayName("상품명, 상품상세설명 or 테스트")
+    public void findByItemNmOrItemDetailTest() {
+        // 테스트 상품을 만드는 메소드 실행, 조회할 대상 만들기용
+        this.createItemTest();
+
+        /*
+        상품명이 "테스트 상품 1" 또는 상품 상세 설명이 "테스트 상품 상세 설명 5"이면
+        해당 상품을 itemList에 할당한다.
+         */
+        List<Item> itemList = itemRepository.findByItemNmOrItemDetail("테스트 상품 1", "테스트 상품 상세 설명 5");
+
+        for (Item item : itemList) {
+            System.out.println(item.toString());
+        } // enhanced for
+
+    } // findByItemNmOrItemDetailTest
+
+    @Test
+    @DisplayName("가격 LessThan 테스트")
+    public void findByPriceLessThanTest() {
+        this.createItemTest();
+
+        /*
+        현재 DB에 저장된 가격은 10001~10010이다.
+        테스트 코드 실행 시 10개의 상품을 저장하는 로그가 콘솔에 나타나고
+        맨 마지막에 가격이 10005보다 작은 4개의 상품을 출력해주는 것을 확인 할 수 있다.
+         */
+        List<Item> itemList = itemRepository.findByPriceLessThan(10005);
+
+        for (Item item : itemList) {
+            System.out.println(item.toString());
+        } // enhanced for
+    } // findByPriceLessThanTest
+
+    @Test
+    @DisplayName("가격 내림차순 조회 테스트")
+    public void findByPriceLessThanOrderByPriceDesc() {
+        this.createItemTest();
+
+        List<Item> itemList = itemRepository.findByPriceLessThanOrderByPriceDesc(10005);
+
+        for (Item item : itemList) {
+            System.out.println(item.toString());
+        } // enhanced for
+    } // findByPriceLessThanOrderByPriceDesc
 } // end class

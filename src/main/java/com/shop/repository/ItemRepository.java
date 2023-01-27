@@ -28,4 +28,19 @@ public interface ItemRepository extends JpaRepository<Item, Long> {
      */
     List<Item> findByItemNm(String itemNm);
 
+    // 상품을 상품명과 상품 상세 설명을 OR 조건을 이용하여 조회하는 쿼리 메소드
+    List<Item> findByItemNmOrItemDetail(String itemNm, String itemDetail);
+
+    // 파라미터로 넘어온 price 변수보다 값이 작은 상품 데이터를 조회하는 쿼리 메소드
+    List<Item> findByPriceLessThan(Integer price);
+
+    /*
+    OrderBy 키워드를 이용한다면 데이터의 순서를 오름차순 또는 내림차순으로 조회할 수 있다.
+    오름차순의 경우 OrderBy + 속성명 + Asc 키워드
+    내림차순의 경우 OrderBy + 속성명 + Desc 키워드
+
+    아래는 상품의 가격이 높은 순으로 조회하는 쿼리 메소드
+     */
+    List<Item> findByPriceLessThanOrderByPriceDesc(Integer price);
+
 } // end interface
