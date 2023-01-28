@@ -2,6 +2,8 @@ package com.shop.repository;
 
 import com.shop.entity.Item;
 import org.springframework.data.jpa.repository.JpaRepository;
+import org.springframework.data.jpa.repository.Query;
+import org.springframework.data.repository.query.Param;
 
 import java.util.List;
 
@@ -42,5 +44,43 @@ public interface ItemRepository extends JpaRepository<Item, Long> {
     아래는 상품의 가격이 높은 순으로 조회하는 쿼리 메소드
      */
     List<Item> findByPriceLessThanOrderByPriceDesc(Integer price);
+
+    /*
+    Spring Data JPA에서 제공하는 @Query 어노테이션을 이용하면 SQL과 유사한 JPQL(Java Persistence Query Language)이라는
+    객체지향 쿼리 언어를 통해 복잡한 쿼리도 처리가 가능하다(SQL과 문법 자체가 유사).
+    SQL의 경우 DB의 테이블을 대상으로 쿼리를 수행하고, JPQL은 엔티티 객체를 대상으로 쿼리를 수행하는 객체지향 쿼리이다.
+    JPQL로 작성했다면 DB가 변경되어도 애플리케이션이 영향을 받지 않는다.
+
+    @Query 어노테이션을 이용하여 상품 데이터를 조회
+    상품 상세 설명을 파라미터로 받아 해당 내용을 상품 상세 설명에 포함하고 있는 데이터를 조회하며,
+    정렬 순서는 가격이 높은 순으로 조회한다.
+
+    @Query 어노테이션 안에 JPQL로 작성한 쿼리문을 넣어주고 from 뒤에는 엔티티 클래스로 작성한 Item을 지정해준다.
+    Item으로부터 데이터를 SELECT하겠다는 것을 의미한다.
+     */
+    @Query("SELECT i FROM Item i WHERE i.itemDetail LIKE %:itemDetail% ORDER BY i.price DESC")
+
+    /*
+    파라미터에 @Param 어노테이션을 이용하여 파라미터로 넘어온 값을 JPQL에 들어갈 변수로 지정해 줄 수 있고
+    변수를 JPQL에 전달하는 대신 파라미터의 순서를 이용해 전달해줄 수도 있다.
+    그럴 경우, ':itemDetail' 대신 첫 번째 파라미터를 전달하겠다는 '?1'이라는 표현을 사용하면 된다.
+    하지만 파라미터의 순서로 달라지면 해당 쿼리문이 제대로 동작하지 않을 수 있기 때문에 좀 더 명시적인 방법인
+    @Param 어노테이션을 이용하는 방법을 추천한다.
+
+    현재는 itemDetail 변수를 "LIKE % %" 사이에 ":itemDetail"로 값이 들어가도록 작성
+     */
+    List<Item> findByItemDetail(@Param("itemDetail") String itemDetail);
+
+    /*
+    복잡한 쿼리의 경우 @Query 어노테이션을 사용해서 조회
+    만약, 기존의 DB에서 사용하던 쿼리를 그대로 사용해야 할 때는 @Query의 nativeQuery속성을 사용하면
+    기존 쿼리를 그대로 활용할 수 있다.
+    하지만 특정 DB에 종속되는 쿼리문을 사용하기 때문에 DB에 대해 독립적이라는 장점을 잃어버린다.
+    기존에 작성한 통계용 쿼리처럼 복잡한 쿼리를 그대로 사용해야 하는 경우 활용할 수 있다.
+
+    value 안에 네이티브 쿼리문을 작성하고 nativeQuery=true를 지정한다.
+     */
+    @Query(value = "SELECT * FROM item i WHERE i.item_detail LIKE %:itemDetail% ORDER BY i.price DESC", nativeQuery = true)
+    List<Item> findByItemDetailByNative(@Param("itemDetail") String itemDetail);
 
 } // end interface

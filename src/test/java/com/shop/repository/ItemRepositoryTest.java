@@ -116,10 +116,36 @@ class ItemRepositoryTest {
     public void findByPriceLessThanOrderByPriceDesc() {
         this.createItemTest();
 
+        // 상품 가격이 10005미만인 상품을 가격을 기준으로 내림차순으로 정렬
         List<Item> itemList = itemRepository.findByPriceLessThanOrderByPriceDesc(10005);
 
         for (Item item : itemList) {
             System.out.println(item.toString());
         } // enhanced for
     } // findByPriceLessThanOrderByPriceDesc
+
+    @Test
+    @DisplayName("@Query를 이용한 상품 조회 테스트")
+    public void findByItemDetailTest() {
+        this.createItemTest();
+
+        // 상품 상세 설명에 '테스트 상품 상세 설명'을 포함하고 있는 상품 데이터 10개가 가격이 높은 순부터 조회
+        List<Item> itemList = itemRepository.findByItemDetail("테스트 상품 상세 설명");
+
+        for (Item item : itemList) {
+            System.out.println(item.toString());
+        } // enhanced for
+    } // findByItemDetailTest
+
+    @Test
+    @DisplayName("nativeQuery 속성을 이용한 상품 조회 테스트")
+    public void findByItemDetailByNative() {
+        this.createItemTest();
+
+        List<Item> itemList = itemRepository.findByItemDetailByNative("테스트 상품 상세 설명");
+
+        for (Item item : itemList) {
+            System.out.println(item.toString());
+        } // enhanced for
+    } // findByItemDetailByNative
 } // end class
